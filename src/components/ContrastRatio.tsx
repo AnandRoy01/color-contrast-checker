@@ -12,8 +12,10 @@ function getRatingInfo(ratio: string): {
   color: string;
   wcagLevel: string;
 } {
+  // Make sure we're parsing the string ratio correctly
   const numericRatio = parseFloat(ratio.split(":")[0]);
 
+  // Correct WCAG thresholds
   if (numericRatio >= 7) {
     return {
       text: "AAA (Enhanced)",
@@ -48,10 +50,8 @@ function ContrastRatio({ ratio }: ContrastRatioProps) {
 
   const ratioRef = useRef<HTMLSpanElement>(null);
 
-  // Simple pulse animation when ratio changes
   useEffect(() => {
     if (ratioRef.current) {
-      // Quick scale pulse effect
       animate(
         ratioRef.current,
         { scale: [1, 1.05, 1] },
@@ -61,25 +61,25 @@ function ContrastRatio({ ratio }: ContrastRatioProps) {
   }, [ratio]);
 
   return (
-    <div className={`p-5 sm:p-6 ${themeStyles.preview.section} rounded-xl`}>
-      <h2 className={`text-lg font-medium ${themeStyles.app.text} mb-3`}>
+    <div className={`p-4 ${themeStyles.preview.section} rounded-xl`}>
+      <h2 className={`text-sm font-medium ${themeStyles.app.text} mb-2`}>
         Contrast Ratio
       </h2>
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center mb-2">
         <span
           ref={ratioRef}
-          className={`text-3xl font-bold ${themeStyles.app.text}`}
+          className={`text-xl font-bold ${themeStyles.app.text}`}
         >
           {ratio}
         </span>
         <span
-          className={`${color} font-medium text-base transition-colors duration-300`}
+          className={`${color} font-medium text-sm transition-colors duration-300`}
         >
           {text}
         </span>
       </div>
       <p
-        className={`text-sm ${themeStyles.app.text} opacity-85 mb-2 transition-colors duration-300`}
+        className={`text-xs ${themeStyles.app.text} opacity-85 mb-1 transition-colors duration-300`}
       >
         {wcagLevel}
       </p>

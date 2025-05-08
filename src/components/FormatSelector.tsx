@@ -15,18 +15,18 @@ function FormatSelector() {
   return (
     <div>
       <label
-        className={`text-sm ${themeStyles.app.text} font-medium block mb-2`}
+        className={`text-xs font-medium ${themeStyles.app.text} block mb-1.5`}
       >
         Color Format
       </label>
       <div
-        className={`flex gap-1.5 ${themeStyles.preview.section} p-1.5 rounded-lg`}
+        className={`flex gap-0.5 ${themeStyles.preview.section} p-0.5 rounded-md`}
       >
         {formatOptions.map((option) => (
           <button
             key={option.value}
             className={`
-              flex-1 py-2 px-3 rounded text-sm transition-all duration-200
+              flex-1 py-1 px-1.5 rounded text-[10px] transition-all duration-200
               hover:scale-[1.03] active:scale-[0.97]
               ${
                 colorFormat === option.value

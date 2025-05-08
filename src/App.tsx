@@ -20,15 +20,14 @@ function App() {
 
   const containerRef = useRef<HTMLElement>(null);
 
-  // Single initial fade-in animation
+  // Initial fade-in animation
   useEffect(() => {
     if (containerRef.current) {
-      animate(containerRef.current, {
-        duration: 0.4,
-        easing: [0.25, 0.1, 0.25, 1.0],
-        opacity: [0, 1],
-        y: [20, 0],
-      });
+      animate(
+        containerRef.current,
+        { opacity: [0, 1], y: [20, 0] },
+        { duration: 0.4, easing: [0.25, 0.1, 0.25, 1.0] }
+      );
     }
   }, []);
 
@@ -40,62 +39,56 @@ function App() {
 
   return (
     <main
-      className={`w-full min-h-screen ${themeStyles.app.background} [background-size:16px_16px] flex items-center justify-center p-4 sm:p-6 md:p-8`}
+      className={`w-full min-h-screen ${themeStyles.app.background} [background-size:16px_16px] flex items-center justify-center p-3 sm:p-4`}
     >
       <section
         ref={containerRef}
         className={`
-          opacity-0 rounded-3xl w-full max-w-5xl border-2 ${themeStyles.app.section} 
+          opacity-0 rounded-2xl w-full max-w-md border ${themeStyles.app.section} 
           ${themeStyles.app.border} shadow-lg overflow-hidden
-          flex flex-col md:flex-row
         `}
       >
-        {/* Preview Section - Left side */}
-        <div className="w-full md:w-1/2 p-5 sm:p-6 md:p-8 flex items-center justify-center">
-          <PreviewSection
-            backgroundColor={backgroundColor}
-            foregroundColor={foregroundColor}
-          />
-        </div>
-
-        {/* Controls - Right side */}
         <div
-          className={`w-full md:w-1/2 p-5 sm:p-6 md:p-8 border-t md:border-t-0 md:border-l ${themeStyles.app.border}`}
+          className={`p-4 flex justify-between items-center border-b ${themeStyles.app.border}`}
         >
-          <div className="flex justify-between items-center mb-6">
-            <FormatSelector />
-            <div className="flex gap-3">
-              <button
-                id="reset-button"
-                onClick={() => useStore.getState().resetColors()}
-                className={`p-2 rounded-lg ${themeStyles.button.secondary} transition-colors hover:scale-105 active:scale-95`}
-                aria-label="Reset color values"
-                title="Reset to default colors"
+          <h1 className={`text-base font-semibold ${themeStyles.app.text}`}>
+            Color Contrast Checker
+          </h1>
+          <div className="flex gap-2">
+            <button
+              id="reset-button"
+              onClick={() => useStore.getState().resetColors()}
+              className={`p-1.5 rounded-md ${themeStyles.button.secondary} transition-colors hover:scale-105 active:scale-95`}
+              aria-label="Reset color values"
+              title="Reset to default colors"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className={`w-4 h-4 ${themeStyles.app.text} transition-transform hover:rotate-180`}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className={`w-5 h-5 ${themeStyles.app.text} transition-transform hover:rotate-180`}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                  <path d="M3 3v5h5" />
-                </svg>
-              </button>
-              <ThemeToggle />
-            </div>
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                <path d="M3 3v5h5" />
+              </svg>
+            </button>
+            <ThemeToggle />
           </div>
+        </div>
+        <div className="p-4 space-y-4">
+          <div className="space-y-4">
+            <FormatSelector />
 
-          <div className="space-y-6 mb-8">
             <ColorInput
               label="Background Color"
               colorValue={backgroundColor}
               onColorChange={setBackgroundColor}
             />
+
             <ColorInput
               label="Foreground Color"
               colorValue={foregroundColor}
@@ -104,6 +97,11 @@ function App() {
           </div>
 
           <ContrastRatio ratio={contrastRatio} />
+
+          <PreviewSection
+            backgroundColor={backgroundColor}
+            foregroundColor={foregroundColor}
+          />
         </div>
       </section>
     </main>

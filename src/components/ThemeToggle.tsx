@@ -8,7 +8,6 @@ function ThemeToggle() {
   const themeStyles = THEME[theme];
   const iconRef = useRef<SVGSVGElement>(null);
 
-  // Animate theme icon when theme changes
   useEffect(() => {
     if (iconRef.current) {
       animate(
@@ -23,8 +22,8 @@ function ThemeToggle() {
     <button
       onClick={toggleTheme}
       className={`
-        p-2 rounded-lg ${themeStyles.button.secondary} transition-colors
-        hover:scale-105 active:scale-95 transition-transform
+        p-1.5 rounded-md ${themeStyles.button.secondary}
+        transition-colors hover:scale-105 active:scale-95
       `}
       aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
       title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
@@ -32,7 +31,7 @@ function ThemeToggle() {
       <svg
         ref={iconRef}
         xmlns="http://www.w3.org/2000/svg"
-        className={`w-5 h-5 ${themeStyles.app.text}`}
+        className={`w-4 h-4 ${themeStyles.app.text}`}
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"

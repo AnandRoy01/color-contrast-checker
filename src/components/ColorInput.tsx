@@ -50,12 +50,8 @@ function ColorInput({ label, colorValue, onColorChange }: ColorInputProps) {
   function handleColorChange(e: React.ChangeEvent<HTMLInputElement>) {
     const newColor = e.target.value;
     setInputValue(newColor);
-
-    // Validation based on selected format
     const valid = isValidColor(newColor, colorFormat);
     setIsValid(valid);
-
-    // Only update the actual color if valid
     if (valid) {
       onColorChange(newColor);
       setHexValue(formatToHex(newColor, colorFormat));
@@ -65,12 +61,8 @@ function ColorInput({ label, colorValue, onColorChange }: ColorInputProps) {
   function handleColorPickerChange(e: React.ChangeEvent<HTMLInputElement>) {
     const newHexColor = e.target.value;
     setHexValue(newHexColor);
-
-    // Convert hex to current format
     const formattedColor = hexToFormat(newHexColor, colorFormat);
     setInputValue(formattedColor);
-
-    // Update the store
     onColorChange(formattedColor);
     setIsValid(true);
   }
@@ -83,20 +75,20 @@ function ColorInput({ label, colorValue, onColorChange }: ColorInputProps) {
       <Field className="w-full">
         <Label
           htmlFor={inputId}
-          className={`text-sm/6 font-medium ${themeStyles.app.text} block mb-2`}
+          className={`text-xs font-medium ${themeStyles.app.text} block mb-1.5`}
         >
           {label}
         </Label>
-        <div className="relative flex items-center gap-3">
+        <div className="relative flex items-center gap-2">
           <div className="flex-grow">
             <Input
               id={inputId}
               className={`
-                block w-full rounded-lg border 
+                block w-full rounded-md border text-xs tracking-widest
                 ${isValid ? "border-transparent" : "border-red-500"} 
-                ${themeStyles.input.background} px-4 py-2.5 text-sm/6 
+                ${themeStyles.input.background} px-3 py-2
                 ${themeStyles.input.text}
-                focus:outline-none focus:ring-2 ${themeStyles.input.focus}
+                focus:outline-none focus:ring-1 ${themeStyles.input.focus}
               `}
               value={inputValue}
               onChange={handleColorChange}
@@ -104,7 +96,7 @@ function ColorInput({ label, colorValue, onColorChange }: ColorInputProps) {
             />
             <p
               ref={errorRef}
-              className="absolute text-xs text-red-500 mt-1.5 opacity-0 hidden"
+              className="absolute text-xs text-red-500 mt-1 opacity-0 hidden"
             >
               Invalid {colorFormat.toUpperCase()} format
             </p>
@@ -120,7 +112,7 @@ function ColorInput({ label, colorValue, onColorChange }: ColorInputProps) {
               aria-label={`Pick ${label} color`}
             />
             <div
-              className={`w-10 h-10 rounded-lg border ${themeStyles.app.border} overflow-hidden cursor-pointer hover:scale-105 active:scale-95 transition-transform`}
+              className={`w-8 h-8 rounded-md border ${themeStyles.app.border} overflow-hidden cursor-pointer hover:scale-105 active:scale-95 transition-transform`}
               style={{ backgroundColor: hexValue }}
             />
           </div>

@@ -1,8 +1,19 @@
-// Convert hex to RGB
+/**
+ * Convert hex to RGB
+ */
 export function hexToRgb(
   hex: string
 ): { r: number; g: number; b: number } | null {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  // Remove '#' if present
+  hex = hex.replace(/^#/, "");
+
+  // Handle shorthand format (e.g. #ABC)
+  if (hex.length === 3) {
+    hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+  }
+
+  const result = /^([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+
   return result
     ? {
         r: parseInt(result[1], 16),
@@ -88,28 +99,176 @@ export function convertColorFormat(
   }
 }
 
-// Calculate relative luminance
-function getLuminance(color: string): number {
-  const rgb = hexToRgb(color);
-  if (!rgb) return 0;
+/**
+ * Convert HSL to RGB
+ * h: 0-360, s: 0-100, l: 0-100
+ */
+export function hslToRgb(
+  h: number,
+  s: number,
+  l: number
+): { r: number; g: number; b: number } {
+  // Convert HSL percentages to decimal
+  s /= 100;
+  l /= 100;
 
-  const { r, g, b } = rgb;
-  const a = [r, g, b].map((v) => {
-    v /= 255;
-    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-  });
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = l - c / 2;
 
-  return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+  let r = 0,
+    g = 0,
+    b = 0;
+
+  if (0 <= h && h < 60) {
+    r = c;
+    g = x;
+    b = 0;
+  } else if (60 <= h && h < 120) {
+    r = x;
+    g = c;
+    b = 0;
+  } else if (120 <= h && h < 180) {
+    r = 0;
+    g = c;
+    b = x;
+  } else if (180 <= h && h < 240) {
+    r = 0;
+    g = x;
+    b = c;
+  } else if (240 <= h && h < 300) {
+    r = x;
+    g = 0;
+    b = c;
+  } else if (300 <= h && h < 360) {
+    r = c;
+    g = 0;
+    b = x;
+  }
+
+  return {
+    r: Math.round((r + m) * 255),
+    g: Math.round((g + m) * 255),
+    b: Math.round((b + m) * 255),
+  };
 }
 
-// Calculate contrast ratio according to WCAG guidelines
+/**
+ * Parse HSL string and return RGB values
+ */
+export function parseHSL(
+  hslStr: string
+): { r: number; g: number; b: number } | null {
+  try {
+    // Handle both hsl() and hsla() formats
+    const isHSLA = hslStr.startsWith("hsla");
+    const valuesMatch = hslStr.match(/\d+(\.\d+)?%?/g);
+
+    if (!valuesMatch || valuesMatch.length < 3) {
+      return null;
+    }
+
+    let h = parseFloat(valuesMatch[0]);
+    let s = parseFloat(valuesMatch[1]);
+    let l = parseFloat(valuesMatch[2]);
+
+    // Handle percentage values
+    if (valuesMatch[1].includes("%")) {
+      s = parseFloat(valuesMatch[1]);
+    } else {
+      s = parseFloat(valuesMatch[1]) * 100;
+    }
+
+    if (valuesMatch[2].includes("%")) {
+      l = parseFloat(valuesMatch[2]);
+    } else {
+      l = parseFloat(valuesMatch[2]) * 100;
+    }
+
+    return hslToRgb(h, s, l);
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * Convert any color format to RGB
+ */
+export function anyColorToRgb(
+  color: string
+): { r: number; g: number; b: number } | null {
+  // Handle different color formats
+  if (color.startsWith("#")) {
+    return hexToRgb(color);
+  } else if (color.startsWith("rgb")) {
+    // Parse RGB(A) string like "rgb(255, 255, 255)" or "rgba(255, 255, 255, 1)"
+    const values = color.match(/\d+(\.\d+)?/g);
+    if (values && values.length >= 3) {
+      return {
+        r: parseInt(values[0], 10),
+        g: parseInt(values[1], 10),
+        b: parseInt(values[2], 10),
+      };
+    }
+  } else if (color.startsWith("hsl")) {
+    return parseHSL(color);
+  }
+
+  // Try to handle it as a hex color without # prefix
+  if (/^[0-9A-Fa-f]{3}$|^[0-9A-Fa-f]{6}$/.test(color)) {
+    return hexToRgb("#" + color);
+  }
+
+  return null;
+}
+
+/**
+ * Calculate the relative luminance of a color
+ * Formula: https://www.w3.org/TR/WCAG20-TECHS/G17.html#G17-tests
+ */
+export function getLuminance(color: string): number {
+  try {
+    // Convert any color format to RGB
+    const rgb = anyColorToRgb(color);
+    if (!rgb) return 0;
+
+    // Convert RGB to sRGB
+    const srgb = [rgb.r, rgb.g, rgb.b].map((val) => {
+      val = val / 255;
+      return val <= 0.03928
+        ? val / 12.92
+        : Math.pow((val + 0.055) / 1.055, 2.4);
+    });
+
+    // Calculate luminance
+    return 0.2126 * srgb[0] + 0.7152 * srgb[1] + 0.0722 * srgb[2];
+  } catch (e) {
+    return 0;
+  }
+}
+
+/**
+ * Calculate contrast ratio between two colors
+ * Formula: (L1 + 0.05) / (L2 + 0.05) where L1 is the lighter color
+ */
 export function calculateContrastRatio(color1: string, color2: string): string {
-  const lum1 = getLuminance(color1);
-  const lum2 = getLuminance(color2);
+  try {
+    // Calculate luminance directly from provided colors in any format
+    const luminance1 = getLuminance(color1);
+    const luminance2 = getLuminance(color2);
 
-  const ratio = (Math.max(lum1, lum2) + 0.05) / (Math.min(lum1, lum2) + 0.05);
+    // Determine lighter and darker colors
+    const lighter = Math.max(luminance1, luminance2);
+    const darker = Math.min(luminance1, luminance2);
 
-  return ratio.toFixed(2) + ":1";
+    // Calculate ratio
+    const ratio = (lighter + 0.05) / (darker + 0.05);
+
+    // Format to 2 decimal places
+    return ratio.toFixed(2) + ":1";
+  } catch (e) {
+    return "1:1"; // Default fallback
+  }
 }
 
 // Validate hex color
